@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI导航 — Cloudflare Pages 部署教程</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:-apple-system,'Noto Sans SC',sans-serif;background:#0F172A;color:#E2E8F0;line-height:1.8;padding:2rem;max-width:800px;margin:0 auto}
+  h1{font-size:1.8rem;color:#22C55E;margin-bottom:.5rem;border-bottom:2px solid #22C55E33;padding-bottom:.5rem}
+  h2{font-size:1.3rem;color:#38BDF8;margin:2.5rem 0 1rem;padding-left:.75rem;border-left:3px solid #38BDF8}
+  h3{font-size:1.05rem;color:#A78BFA;margin:1.5rem 0 .75rem}
+  p{margin:.5rem 0;color:#CBD5E1}
+  .subtitle{color:#94A3B8;font-size:.95rem;margin-bottom:2rem}
+  table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.9rem}
+  th{background:#1E293B;color:#22C55E;padding:.6rem 1rem;text-align:left;border:1px solid #334155}
+  td{padding:.6rem 1rem;border:1px solid #334155;color:#CBD5E1}
+  tr:hover td{background:#1E293B}
+  .step{background:#1E293B;border-radius:12px;padding:1.5rem;margin:1rem 0;border:1px solid #334155}
+  .step-num{display:inline-block;width:28px;height:28px;background:#22C55E;color:#0F172A;border-radius:50%;text-align:center;line-height:28px;font-weight:700;font-size:.85rem;margin-right:.5rem}
+  .step ol{padding-left:1.5rem;margin:.75rem 0}
+  .step li{margin:.4rem 0;color:#CBD5E1}
+  .highlight{background:#22C55E22;border:1px solid #22C55E44;border-radius:8px;padding:1rem 1.25rem;margin:1rem 0}
+  .highlight strong{color:#22C55E}
+  .warning{background:#F59E0B22;border:1px solid #F59E0B44;border-radius:8px;padding:1rem 1.25rem;margin:1rem 0}
+  .warning strong{color:#F59E0B}
+  code{background:#334155;padding:.15rem .4rem;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:.85rem;color:#22C55E}
+  pre{background:#0D1117;border:1px solid #334155;border-radius:8px;padding:1rem;overflow-x:auto;margin:.75rem 0}
+  pre code{background:none;padding:0;color:#E2E8F0}
+  .secret-box{background:#0D1117;border:1px solid #334155;border-radius:8px;padding:1rem;margin:.75rem 0;font-family:'JetBrains Mono',monospace;font-size:.85rem}
+  .secret-name{color:#22C55E;font-weight:700}
+  .secret-val{color:#94A3B8;font-style:italic}
+  .arrow{color:#22C55E;font-size:1.2rem;margin:0 .3rem}
+  .flow{display:flex;align-items:center;flex-wrap:wrap;gap:.5rem;margin:1rem 0;font-size:.9rem}
+  .flow-item{background:#1E293B;padding:.4rem .8rem;border-radius:6px;border:1px solid #334155}
+  .result-box{background:#22C55E11;border:1px dashed #22C55E44;border-radius:8px;padding:1rem;margin:1rem 0;font-family:'JetBrains Mono',monospace;font-size:.85rem;color:#22C55E}
+  a{color:#38BDF8;text-decoration:none}
+  a:hover{text-decoration:underline}
+  .badge{display:inline-block;background:#22C55E;color:#0F172A;padding:.2rem .6rem;border-radius:4px;font-size:.75rem;font-weight:700;margin-right:.3rem}
+  hr{border:none;border-top:1px solid #334155;margin:2rem 0}
+</style>
+</head>
+<body>
+
+<h1>AI导航 — Cloudflare Pages 部署教程</h1>
+<p class="subtitle">从 GitHub 自动部署到 Cloudflare Pages 的完整配置指南</p>
+
+<div class="highlight">
+  <strong>需要配置 2 个 GitHub Secrets：</strong>
+  <table style="margin-top:.5rem">
+    <tr><th>Secret 名称</th><th>来源</th></tr>
+    <tr><td><code>CLOUDFLARE_ACCOUNT_ID</code></td><td>Cloudflare Dashboard 首页</td></tr>
+    <tr><td><code>CLOUDFLARE_API_TOKEN</code></td><td>Cloudflare API 令牌页面创建</td></tr>
+  </table>
+</div>
+
+<div class="flow">
+  <div class="flow-item">获取 Account ID</div>
+  <span class="arrow">→</span>
+  <div class="flow-item">创建 API Token</div>
+  <span class="arrow">→</span>
+  <div class="flow-item">添加到 GitHub Secrets</div>
+  <span class="arrow">→</span>
+  <div class="flow-item">触发部署</div>
+  <span class="arrow">→</span>
+  <div class="flow-item" style="border-color:#22C55E;color:#22C55E">上线完成 ✓</div>
+</div>
+
+<hr>
+
+<h2>第一步：获取 Cloudflare Account ID</h2>
+
+<div class="step">
+  <p><span class="step-num">1</span>打开 <a href="https://dash.cloudflare.com" target="_blank">Cloudflare Dashboard</a>，登录你的账号</p>
+  <ol>
+    <li>点击左侧菜单 <strong style="color:#fff">「Workers 和 Pages」</strong></li>
+    <li>在页面 <strong style="color:#fff">右侧边栏</strong> 找到 <strong style="color:#22C55E">「账户 ID」</strong>（Account ID）</li>
+    <li>点击旁边的复制按钮，复制这个 32 位字符串</li>
+  </ol>
+  <div class="secret-box">
+    <span class="secret-name">Account ID:</span> <span class="secret-val">a1b2c3d4e5f67890abcdef1234567890</span>（示例）
+  </div>
+  <div class="warning">
+    <strong>找不到？</strong> 也可以在：账户首页 → 任意域名 → 右下角「API」区域找到
+  </div>
+</div>
+
+<hr>
+
+<h2>第二步：创建 Cloudflare API Token</h2>
+
+<div class="step">
+  <p><span class="step-num">2</span>打开 <a href="https://dash.cloudflare.com/profile/api-tokens" target="_blank">Cloudflare API Tokens 页面</a></p>
+  <ol>
+    <li>或者：右上角头像 → <strong style="color:#fff">「我的个人资料」</strong> → 左侧 <strong style="color:#fff">「API 令牌」</strong></li>
+    <li>点击 <strong style="color:#22C55E">「创建令牌」</strong>（Create Token）</li>
+    <li>在模板列表中，找到 <strong style="color:#fff">「Edit Cloudflare Workers」</strong></li>
+    <li>点击右侧 <strong style="color:#22C55E">「使用模板」</strong>（Use template）</li>
+  </ol>
+</div>
+
+<div class="step">
+  <p><span class="step-num">3</span>配置令牌权限</p>
+  <table>
+    <tr><th>权限范围</th><th>权限类型</th><th>说明</th></tr>
+    <tr><td>Account / Cloudflare Pages</td><td><code>Edit</code></td><td>允许部署页面（模板已预填）</td></tr>
+    <tr><td>Account / Workers Scripts</td><td><code>Edit</code></td><td>模板已预填</td></tr>
+    <tr><td>账户资源</td><td>选择你的账户</td><td>下拉选择</td></tr>
+  </table>
+  <ol>
+    <li>确认权限无误，点击 <strong style="color:#fff">「继续以显示摘要」</strong></li>
+    <li>点击 <strong style="color:#22C55E">「创建令牌」</strong></li>
+  </ol>
+</div>
+
+<div class="warning">
+  <strong>重要：Token 只显示一次！</strong> 创建后立即复制保存。如果丢失只能重新创建。
+</div>
+
+<div class="secret-box">
+  <span class="secret-name">API Token:</span> <span class="secret-val">Abc123Xyz456_qwerty789...</span>（示例，实际更长）
+</div>
+
+<hr>
+
+<h2>第三步：在 GitHub 添加 Secrets</h2>
+
+<p>你已在此页面：<code>Settings → Secrets and variables → Actions</code></p>
+
+<div class="step">
+  <p><span class="step-num">4</span>添加 <code>CLOUDFLARE_ACCOUNT_ID</code></p>
+  <ol>
+    <li>点击绿色按钮 <strong style="color:#22C55E">「New repository secret」</strong></li>
+    <li><strong style="color:#fff">Name</strong> 输入：<code>CLOUDFLARE_ACCOUNT_ID</code></li>
+    <li><strong style="color:#fff">Secret</strong> 粘贴第一步复制的 Account ID</li>
+    <li>点击 <strong style="color:#22C55E">「Add secret」</strong></li>
+  </ol>
+</div>
+
+<div class="step">
+  <p><span class="step-num">5</span>添加 <code>CLOUDFLARE_API_TOKEN</code></p>
+  <ol>
+    <li>再次点击 <strong style="color:#22C55E">「New repository secret」</strong></li>
+    <li><strong style="color:#fff">Name</strong> 输入：<code>CLOUDFLARE_API_TOKEN</code></li>
+    <li><strong style="color:#fff">Secret</strong> 粘贴第二步创建的 API Token</li>
+    <li>点击 <strong style="color:#22C55E">「Add secret」</strong></li>
+  </ol>
+</div>
+
+<div class="result-box">
+  添加完成后页面应显示：<br><br>
+  Repository secrets<br>
+  ├── CLOUDFLARE_ACCOUNT_ID &nbsp;&nbsp; Updated just now<br>
+  └── CLOUDFLARE_API_TOKEN &nbsp;&nbsp;&nbsp; Updated just now
+</div>
+
+<hr>
+
+<h2>第四步：触发部署</h2>
+
+<div class="step">
+  <p><span class="step-num">6</span>在终端执行以下命令触发 CI/CD：</p>
+  <pre><code>git commit --allow-empty -m "ci: trigger deploy"
+git push</code></pre>
+  <p style="margin-top:.75rem">或者在任何代码变更后 <code>git push</code> 即可自动触发。</p>
+</div>
+
+<hr>
+
+<h2>第五步：验证部署</h2>
+
+<div class="step">
+  <p><span class="step-num">7</span>确认部署成功</p>
+  <ol>
+    <li>打开仓库 <a href="https://github.com/z1243161996/ai-navigator/actions" target="_blank">Actions 标签页</a>，查看 workflow 运行状态</li>
+    <li>绿色 ✓ 表示部署成功</li>
+    <li>打开 <a href="https://dash.cloudflare.com" target="_blank">Cloudflare Dashboard</a> → Workers & Pages</li>
+    <li>找到 <strong style="color:#fff">ai-navigator</strong> 项目，查看部署 URL</li>
+  </ol>
+  <div class="result-box">
+    默认域名：<strong>ai-navigator.pages.dev</strong>
+  </div>
+</div>
+
+<hr>
+
+<h2>自定义域名（可选）</h2>
+
+<div class="step">
+  <ol>
+    <li>Cloudflare Dashboard → Workers & Pages → ai-navigator</li>
+    <li>点击 <strong style="color:#fff">「自定义域」</strong> 标签</li>
+    <li>点击 <strong style="color:#22C55E">「设置自定义域」</strong></li>
+    <li>输入你的域名（如 <code>nav.yourdomain.com</code>）</li>
+    <li>如果域名在 Cloudflare 管理，DNS 记录会自动添加</li>
+  </ol>
+</div>
+
+<hr>
+
+<h2>常见问题</h2>
+
+<table>
+  <tr><th>问题</th><th>解决方案</th></tr>
+  <tr><td>Authentication error</td><td>检查 <code>CLOUDFLARE_API_TOKEN</code> 是否正确，重新创建</td></tr>
+  <tr><td>Account not found</td><td>检查 <code>CLOUDFLARE_ACCOUNT_ID</code> 是否正确</td></tr>
+  <tr><td>npm ci failed</td><td>确保 <code>web/package-lock.json</code> 已提交到仓库</td></tr>
+  <tr><td>页面 404</td><td>检查 build output 是 <code>web/dist</code>，确认 <code>_redirects</code> 文件存在</td></tr>
+</table>
+
+<hr>
+<p style="text-align:center;color:#475569;font-size:.8rem;margin-top:2rem">AI导航 部署教程 · 2026-05-17</p>
+
+</body>
+</html>
