@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>AI导航 - 快速收藏</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{width:360px;font-family:'Segoe UI','Noto Sans SC',sans-serif;background:#0F172A;color:#F8FAFC}
+.header{display:flex;align-items:center;gap:10px;padding:16px;border-bottom:1px solid rgba(255,255,255,.06)}
+.header .icon{width:32px;height:32px;background:linear-gradient(135deg,#22C55E,#059669);border-radius:10px;display:flex;align-items:center;justify-content:center}
+.header h1{font-size:14px;font-weight:600}
+.form{padding:16px;display:flex;flex-direction:column;gap:12px}
+label{font-size:11px;color:#64748B;display:block;margin-bottom:4px}
+input,select{width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:10px 14px;font-size:13px;color:#F8FAFC;outline:none}
+input:focus,select:focus{border-color:rgba(34,197,94,.5)}
+input::placeholder{color:#475569}
+select{cursor:pointer}
+select option{background:#1E293B}
+.btn{width:100%;padding:10px;border:none;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;transition:background .2s}
+.btn-primary{background:#22C55E;color:#fff}
+.btn-primary:hover{background:#16A34A}
+.btn-primary:disabled{opacity:.5;cursor:not-allowed}
+.msg{font-size:12px;text-align:center;padding:4px 0;min-height:20px}
+.msg.ok{color:#22C55E}
+.msg.err{color:#EF4444}
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z"/></svg></div>
+  <h1>AI导航 - 快速收藏</h1>
+</div>
+<div class="form">
+  <div><label>网址</label><input id="url" type="url" placeholder="https://example.com" readonly></div>
+  <div><label>标题</label><input id="title" type="text" placeholder="网站名称"></div>
+  <div><label>描述 (可选)</label><input id="desc" type="text" placeholder="简短描述"></div>
+  <div><label>分类</label><select id="cat"></select></div>
+  <button class="btn btn-primary" id="addBtn">添加到 AI导航</button>
+  <div class="msg" id="msg"></div>
+</div>
+<script src="popup.js"></script>
+</body>
+</html>

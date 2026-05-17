@@ -1,0 +1,21 @@
+{
+  "manifest_version": 3,
+  "name": "AI导航",
+  "version": "1.0.0",
+  "description": "AI导航 - 智能书签导航与AI搜索引擎集成，聚合300+站点",
+  "chrome_url_overrides": { "newtab": "index.html" },
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icon16.svg",
+      "48": "icons/icon48.svg",
+      "128": "icons/icon128.svg"
+    }
+  },
+  "permissions": ["storage", "activeTab", "tabs"],
+  "icons": {
+    "16": "icons/icon16.svg",
+    "48": "icons/icon48.svg",
+    "128": "icons/icon128.svg"
+  }
+}

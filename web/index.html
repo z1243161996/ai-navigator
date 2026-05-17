@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI导航</title>
+<meta name="description" content="AI导航 - 智能书签导航，聚合 300+ AI工具、开发工具、常用网站">
+<meta name="theme-color" content="#0F172A">
+<meta property="og:title" content="AI导航">
+<meta property="og:description" content="智能书签导航，聚合 300+ AI工具与开发工具">
+<meta property="og:type" content="website">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="manifest" href="/manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/src/style.css">
+</head>
+<body>
+
+<div class="particles" id="particles"></div>
+
+<div class="fixed top-4 right-4 z-50 flex items-center gap-1.5" id="floatBtns">
+  <button class="ibtn revealable" id="settingsBtn" title="设置">
+    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.325.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.241-.438.613-.43.992a7.723 7.723 0 010 .255c-.008.378.137.75.43.991l1.004.827c.424.35.534.955.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.47 6.47 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.281c-.09.543-.56.94-1.11.94h-2.594c-.55 0-1.019-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.991a6.932 6.932 0 010-.255c.007-.38-.138-.751-.43-.992l-1.004-.827a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.086.22-.128.332-.183.582-.495.644-.869l.214-1.28z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+  </button>
+  <button class="ibtn" id="themeBtn" title="切换主题">
+    <svg class="w-4 h-4 ico-sun" style="color:#F59E0B" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z"/></svg>
+    <svg class="w-4 h-4 ico-moon" style="display:none;color:#6366F1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z"/></svg>
+  </button>
+</div>
+
+<section class="hero-wrap centered relative z-10 flex flex-col items-center px-4" id="hero">
+  <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center shadow-lg shadow-green-500/20 mb-8 cursor-pointer" id="heroIcon">
+    <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456z"/></svg>
+  </div>
+  <div class="w-full max-w-xl">
+    <div class="flex items-center glass-s rounded-2xl overflow-hidden shadow-lg" style="min-height:50px">
+      <input type="text" id="si" placeholder="搜索一下..." class="flex-1 bg-transparent px-5 py-3 text-sm t1 placeholder:t3 outline-none min-w-0">
+      <button id="searchBtn" class="px-4 py-3 t3 hover:text-green-500 transition-colors cursor-pointer shrink-0">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg>
+      </button>
+    </div>
+  </div>
+</section>
+
+<section class="revealable max-w-7xl mx-auto px-4 sm:px-6 pt-4 pb-2 relative z-10" id="catWrap">
+  <div class="flex flex-wrap gap-2 pb-2" id="catTabs"></div>
+</section>
+<section class="revealable max-w-7xl mx-auto px-4 sm:px-6 py-4 relative z-10" id="gridWrap">
+  <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 gap-2.5" id="grid"></div>
+</section>
+<footer class="revealable text-center py-5 t3 text-xs relative z-10" id="footWrap">AI导航 v1.0.0</footer>
+
+<div class="overlay" id="setOv">
+  <div class="mbox glass-s rounded-2xl w-full max-w-lg mx-4 max-h-[85vh] overflow-hidden flex flex-col">
+    <div class="flex items-center justify-between p-5 pb-3 shrink-0">
+      <h3 class="font-mono font-semibold t1">设置</h3>
+      <button class="ibtn" id="closeSetBtn"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg></button>
+    </div>
+    <div class="flex gap-1 px-5 pb-3 overflow-x-auto shrink-0" style="scrollbar-width:none" id="settingsTabs">
+      <button class="settings-tab active" data-tab="tabBm">书签</button>
+      <button class="settings-tab" data-tab="tabEng">搜索引擎</button>
+      <button class="settings-tab" data-tab="tabSync">云同步</button>
+      <button class="settings-tab" data-tab="tabAccount">账号</button>
+      <button class="settings-tab" data-tab="tabExt">扩展</button>
+    </div>
+    <div class="flex-1 overflow-y-auto px-5 pb-5">
+      <div id="tabBm" class="space-y-3">
+        <div><label class="block text-xs t3 mb-1">网址</label><input type="url" id="bmU" placeholder="https://example.com" class="w-full bg-black/5 dark:bg-white/5 border bsoft rounded-xl px-4 py-2.5 text-sm t1 placeholder:t3 outline-none focus:border-green-500/50"></div>
+        <div><div class="flex items-center gap-2 mb-1"><label class="block text-xs t3">标题</label><span id="bmHint" class="text-[10px] text-green-500 font-medium" style="display:none">自动识别</span></div><input type="text" id="bmT" placeholder="网站名称 (输入网址后自动填入)" class="w-full bg-black/5 dark:bg-white/5 border bsoft rounded-xl px-4 py-2.5 text-sm t1 placeholder:t3 outline-none focus:border-green-500/50"></div>
+        <div><label class="block text-xs t3 mb-1">描述</label><input type="text" id="bmD" placeholder="简短描述 (可选, 自动填入)" class="w-full bg-black/5 dark:bg-white/5 border bsoft rounded-xl px-4 py-2.5 text-sm t1 placeholder:t3 outline-none focus:border-green-500/50"></div>
+        <div><label class="block text-xs t3 mb-1">分类</label><select id="bmC" class="w-full bg-black/5 dark:bg-white/5 border bsoft rounded-xl px-4 py-2.5 text-sm t1 outline-none cursor-pointer"></select></div>
+        <button id="addBmBtn" class="w-full bg-green-500 hover:bg-green-400 rounded-xl py-2.5 text-sm font-semibold text-white transition-colors cursor-pointer">添加书签</button>
+      </div>
+      <div id="tabEng" class="space-y-4" style="display:none">
+        <div><p class="text-xs t3 mb-2">当前引擎</p><div class="glass rounded-xl p-3 flex items-center gap-3"><span class="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold text-white" id="ceI" style="background:#3245FF">B</span><span class="text-sm font-medium t1" id="ceN2">百度</span></div></div>
+        <div><p class="text-xs t3 mb-2">预置引擎</p><div class="grid grid-cols-2 gap-2" id="epL"></div></div>
+        <div><p class="text-xs t3 mb-2">自定义引擎</p><div class="space-y-2" id="ecL"></div></div>
+        <div class="glass rounded-xl p-4 space-y-3">
+          <p class="text-xs font-medium t2">添加自定义引擎</p>
+          <input type="text" id="ceNI" placeholder="名称" class="w-full bg-black/5 dark:bg-white/5 border bsoft rounded-lg px-3 py-2 text-sm t1 placeholder:t3 outline-none focus:border-green-500/50">
+          <input type="text" id="ceUI" placeholder="URL (用 %s 代替关键词)" class="w-full bg-black/5 dark:bg-white/5 border bsoft rounded-lg px-3 py-2 text-sm t1 placeholder:t3 outline-none focus:border-green-500/50">
+          <button id="addCEBtn" class="w-full bg-green-500 hover:bg-green-400 rounded-lg py-2 text-sm font-semibold text-white transition-colors cursor-pointer">添加</button>
+        </div>
+      </div>
+      <div id="tabSync" class="space-y-4" style="display:none">
+        <div class="glass rounded-xl p-4"><div class="flex items-center justify-between mb-2"><span class="text-sm t1 font-medium">启用云同步</span><div class="w-11 h-6 bg-green-500 rounded-full flex items-center p-0.5 cursor-pointer" id="syncToggle"><div class="w-5 h-5 bg-white rounded-full shadow ml-auto transition-all"></div></div></div><p class="text-xs t3">登录账号后，书签和设置将自动跨设备同步。</p></div>
+        <div class="glass rounded-xl p-4 space-y-3"><div class="flex items-center justify-between"><span class="text-xs t2">同步状态</span><span class="text-xs text-green-500 flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>已同步</span></div><div class="flex items-center justify-between"><span class="text-xs t2">上次同步</span><span class="text-xs t3">刚刚</span></div><div class="flex items-center justify-between"><span class="text-xs t2">书签数量</span><span class="text-xs t3" id="bmCount">0</span></div></div>
+        <div class="flex gap-3"><button class="flex-1 glass rounded-xl py-2.5 text-sm font-medium cursor-pointer t2 hover:t1 transition-colors">导出数据</button><button class="flex-1 glass rounded-xl py-2.5 text-sm font-medium cursor-pointer t2 hover:t1 transition-colors">导入数据</button></div>
+      </div>
+      <div id="tabAccount" class="space-y-4" style="display:none">
+        <div class="glass rounded-xl p-4 flex items-center gap-4"><div class="w-12 h-12 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center text-white font-bold text-lg">?</div><div><p class="text-sm font-medium t1">未登录</p><p class="text-xs t3">登录后开启云同步和个性化设置</p></div></div>
+        <p class="text-xs t3">第三方账号登录</p>
+        <div class="space-y-2">
+          <button class="oauth-btn" data-provider="Google"><svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg><span>Google 登录</span></button>
+          <button class="oauth-btn" data-provider="GitHub"><svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg><span>GitHub 登录</span></button>
+          <button class="oauth-btn" data-provider="微信"><svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="#07C160"><path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 01.213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 00.167-.054l1.903-1.114a.864.864 0 01.717-.098 10.16 10.16 0 002.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.703-1.415 3.882-1.98 5.853-1.838-.576-3.583-4.196-6.348-8.596-6.348zM5.785 5.991c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 01-1.162 1.178A1.17 1.17 0 014.623 7.17c0-.651.52-1.18 1.162-1.18zm5.813 0c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 01-1.162 1.178 1.17 1.17 0 01-1.162-1.178c0-.651.52-1.18 1.162-1.18zm3.97 3.104c-1.413-.024-2.882.358-4.09 1.205-1.547 1.083-2.457 2.842-2.457 4.487 0 .197.019.388.048.578.177 1.14.756 2.177 1.592 2.97.835.791 1.953 1.388 3.162 1.6a7.426 7.426 0 002.209-.015.66.66 0 01.547.074l1.455.853a.25.25 0 00.127.04.224.224 0 00.222-.224c0-.055-.022-.109-.036-.163l-.298-1.132a.452.452 0 01.163-.508C19.731 17.614 20.7 16 20.7 14.205c0-2.692-2.202-5.021-5.132-5.11zm-1.906 2.965c.49 0 .888.404.888.901a.895.895 0 01-.888.9.895.895 0 01-.888-.9c0-.497.397-.9.888-.9zm4.444 0c.49 0 .888.404.888.901a.895.895 0 01-.888.9.895.895 0 01-.888-.9c0-.497.398-.9.888-.9z"/></svg><span>微信登录</span></button>
+          <button class="oauth-btn" data-provider="QQ"><svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="#12B7F5"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 14.19c-.33.26-.84.53-1.52.74.13.39.12.73-.04.95-.23.32-.72.33-1.22.18a4.1 4.1 0 01-1.02-.52c-.22.03-.44.05-.67.05h-.34c-.23 0-.45-.02-.67-.05-.29.22-.64.41-1.02.52-.5.15-.99.14-1.22-.18-.16-.22-.17-.56-.04-.95-.68-.21-1.19-.48-1.52-.74-.39-.3-.42-.55-.31-.66.11-.11.42-.06.82.2-.02-.45.05-.96.22-1.52-.8-1.1-1.32-2.49-1.32-3.43 0-2.19 2.3-3.97 5.14-3.97h.26c2.84 0 5.14 1.78 5.14 3.97 0 .94-.52 2.33-1.32 3.43.17.56.24 1.07.22 1.52.4-.26.71-.31.82-.2.11.11.08.36-.31.66z"/></svg><span>QQ 登录</span></button>
+          <button class="oauth-btn" data-provider="Apple"><svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="currentColor"><path d="M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.48-3.24 0-1.44.62-2.2.44-3.06-.4C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/></svg><span>Apple 登录</span></button>
+        </div>
+      </div>
+      <div id="tabExt" class="space-y-4" style="display:none">
+        <div class="flex gap-3"><div class="w-8 h-8 rounded-lg bg-green-500/15 flex items-center justify-center shrink-0 mt-0.5"><svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21v-8.25M15.75 21v-8.25M8.25 21v-8.25M3 9l9-6 9 6"/></svg></div><div class="text-sm t2"><h4 class="font-semibold t1 mb-1">新标签页替换</h4><p>安装后新标签页自动打开 AI导航。</p></div></div>
+        <div class="flex gap-3"><div class="w-8 h-8 rounded-lg bg-blue-500/15 flex items-center justify-center shrink-0 mt-0.5"><svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0111.186 0z"/></svg></div><div class="text-sm t2"><h4 class="font-semibold t1 mb-1">一键收藏</h4><p>点击扩展图标，自动抓取当前页面标题和 URL。</p></div></div>
+        <div class="flex gap-3"><div class="w-8 h-8 rounded-lg bg-purple-500/15 flex items-center justify-center shrink-0 mt-0.5"><svg class="w-4 h-4 text-purple-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5"/></svg></div><div class="text-sm t2"><h4 class="font-semibold t1 mb-1">跨设备同步</h4><p>基于 chrome.storage.sync 自动云同步。</p></div></div>
+        <div class="rounded-xl p-4" style="background:rgba(34,197,94,.06)"><p class="font-mono text-xs t3 mb-2">manifest.json</p><pre class="text-xs t1 font-mono overflow-x-auto"><code>{ "manifest_version": 3,
+  "name": "AI导航",
+  "chrome_url_overrides": { "newtab": "index.html" },
+  "action": { "default_popup": "popup.html" },
+  "permissions": ["storage", "activeTab"] }</code></pre></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="module" src="/src/main.js"></script>
+</body>
+</html>

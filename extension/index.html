@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI导航</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+<script>tailwind.config={darkMode:'class',theme:{extend:{fontFamily:{mono:['JetBrains Mono','monospace'],sans:['IBM Plex Sans','Noto Sans SC','sans-serif']}}}}</script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:'IBM Plex Sans','Noto Sans SC',sans-serif;min-height:100vh;transition:color .3s;overflow-x:hidden}
+.dark body{background:#0F172A;color:#F8FAFC}
+body{background:#F1F5F9;color:#0F172A}
+
+.particles{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+.particle{position:absolute;border-radius:50%;animation:floatUp linear infinite}
+@keyframes floatUp{0%{transform:translateY(100vh) scale(0);opacity:0}10%{opacity:1}90%{opacity:1}100%{transform:translateY(-10vh) scale(1);opacity:0}}
+
+.glass{backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);transition:background .3s,border-color .3s,box-shadow .3s}
+.dark .glass{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08)}
+.glass{background:rgba(255,255,255,.6);border:1px solid rgba(0,0,0,.06)}
+.glass-s{backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);transition:background .3s,border-color .3s}
+.dark .glass-s{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1)}
+.glass-s{background:rgba(255,255,255,.75);border:1px solid rgba(0,0,0,.07)}
+
+.nav-card{transition:all .2s;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;height:110px;justify-content:center}
+.dark .nav-card:hover{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.18);box-shadow:0 8px 24px rgba(0,0,0,.3)}
+.nav-card:hover{background:rgba(255,255,255,.85);border-color:rgba(0,0,0,.1);box-shadow:0 6px 20px rgba(0,0,0,.08);transform:translateY(-2px)}
+
+.cat-pill{transition:all .15s;cursor:pointer;white-space:nowrap}
+.cat-pill.active{background:rgba(34,197,94,.15);color:#22C55E;border-color:rgba(34,197,94,.3)}
+.dark .cat-pill:not(.active){color:#94A3B8}.cat-pill:not(.active){color:#64748B}
+.cat-pill:not(.active):hover{background:rgba(0,0,0,.04)}
+.dark .cat-pill:not(.active):hover{background:rgba(255,255,255,.05)}
+
+.dark .t1{color:#F8FAFC}.t1{color:#0F172A}
+.dark .t2{color:#94A3B8}.t2{color:#64748B}
+.dark .t3{color:#64748B}.t3{color:#94A3B8}
+.dark .bsoft{border-color:rgba(255,255,255,.06)}.bsoft{border-color:rgba(0,0,0,.06)}
+.site-icon{width:32px;height:32px;border-radius:10px;object-fit:contain;background:rgba(128,128,128,.08)}
+
+.overlay{position:fixed;inset:0;z-index:500;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s}
+.overlay.open{opacity:1;pointer-events:auto}
+.dark .overlay{background:rgba(0,0,0,.6)}.overlay{background:rgba(0,0,0,.25)}
+.overlay .mbox{transform:scale(.95);transition:transform .2s}.overlay.open .mbox{transform:scale(1)}
+
+.ibtn{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s}
+.dark .ibtn:hover{background:rgba(255,255,255,.08)}.ibtn:hover{background:rgba(0,0,0,.05)}
+.dark .ibtn{color:#94A3B8}.ibtn{color:#64748B}
+
+.stag{opacity:0;transform:translateY(8px);animation:fu .25s ease forwards}
+@keyframes fu{to{opacity:1;transform:translateY(0)}}
+
+.hero-wrap{transition:all .5s cubic-bezier(.4,0,.2,1)}
+.hero-wrap.centered{padding-top:35vh}
+.hero-wrap.docked{padding-top:24px}
+
+.revealable{opacity:0;transform:translateY(20px);pointer-events:none;transition:opacity .4s,transform .4s}
+.revealable.show{opacity:1;transform:translateY(0);pointer-events:auto}
+
+.theme-ripple{position:fixed;border-radius:50%;pointer-events:none;z-index:1;transform:scale(0)}
+.theme-ripple.run{transition:transform .6s cubic-bezier(.4,0,.2,1);transform:scale(1)}
+
+.dd-opt{transition:background .12s;cursor:pointer}
+.dark .dd-opt:hover{background:rgba(255,255,255,.07)}.dd-opt:hover{background:rgba(0,0,0,.04)}
+
+.settings-tab{cursor:pointer;transition:all .15s;padding:8px 16px;border-radius:8px;font-size:13px;white-space:nowrap}
+.settings-tab.active{background:rgba(34,197,94,.15);color:#22C55E}
+.dark .settings-tab:not(.active){color:#94A3B8}.settings-tab:not(.active){color:#64748B}
+.settings-tab:not(.active):hover{background:rgba(0,0,0,.04)}
+.dark .settings-tab:not(.active):hover{background:rgba(255,255,255,.05)}
+
+.oauth-btn{display:flex;align-items:center;gap:10px;padding:10px 16px;border-radius:12px;font-size:13px;font-weight:500;cursor:pointer;transition:all .2s;width:100%}
+.dark .oauth-btn{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:#F8FAFC}
+.oauth-btn{background:rgba(0,0,0,.03);border:1px solid rgba(0,0,0,.06);color:#0F172A}
+.oauth-btn:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,.1)}
+
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:transparent}
+.dark ::-webkit-scrollbar-thumb{background:rgba(255,255,255,.08)}
+::-webkit-scrollbar-thumb{background:rgba(0,0,0,.08);border-radius:3px}
+
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+@media(max-width:640px){.hm{display:none!important}}
+</style>
+</head>
+<body>
+
+<div class="particles" id="particles"></div>
+
+<!-- ===== FLOATING BUTTONS (always visible, top-right) ===== -->
+<div class="fixed top-4 right-4 z-50 flex items-center gap-1.5" id="floatBtns">
+  <button onclick="openSettings()" class="ibtn revealable" id="settingsBtn" title="设置">
+    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.325.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.241-.438.613-.43.992a7.723 7.723 0 010 .255c-.008.378.137.75.43.991l1.004.827c.424.35.534.955.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.47 6.47 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.281c-.09.543-.56.94-1.11.94h-2.594c-.55 0-1.019-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.991a6.932 6.932 0 010-.255c.007-.38-.138-.751-.43-.992l-1.004-.827a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.086.22-.128.332-.183.582-.495.644-.869l.214-1.28z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+  </button>
+  <button onclick="toggleTheme()" class="ibtn" id="themeBtn" title="切换主题">
+    <svg class="w-4 h-4 ico-sun" style="color:#F59E0B" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z"/></svg>
+    <svg class="w-4 h-4 ico-moon" style="display:none;color:#6366F1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z"/></svg>
+  </button>
+</div>
+
+<!-- ===== HERO ===== -->
+<section class="hero-wrap centered relative z-10 flex flex-col items-center px-4" id="hero">
+  <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center shadow-lg shadow-green-500/20 mb-8 cursor-pointer" onclick="expanded?collapse():void 0">
+    <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456z"/></svg>
+  </div>
+  <div class="w-full max-w-xl">
+    <div class="flex items-center glass-s rounded-2xl overflow-hidden shadow-lg" style="min-height:50px">
+      <input type="text" id="si" placeholder="搜索一下..." class="flex-1 bg-transparent px-5 py-3 text-sm t1 placeholder:t3 outline-none min-w-0" onkeydown="if(event.key==='Enter')doSearch()" onclick="event.stopPropagation()">
+      <button onclick="event.stopPropagation();doSearch()" class="px-4 py-3 t3 hover:text-green-500 transition-colors cursor-pointer shrink-0">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg>
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- ===== CONTENT ===== -->
+<section class="revealable max-w-7xl mx-auto px-4 sm:px-6 pt-4 pb-2 relative z-10" id="catWrap">
+  <div class="flex flex-wrap gap-2 pb-2" id="catTabs"></div>
+</section>
+<section class="revealable max-w-7xl mx-auto px-4 sm:px-6 py-4 relative z-10" id="gridWrap">
+  <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 gap-2.5" id="grid"></div>
+</section>
+<footer class="revealable text-center py-5 t3 text-xs relative z-10" id="footWrap">AI导航 v1.0.0</footer>
+
+<!-- ===== SETTINGS MODAL ===== -->
+<div class="overlay" id="setOv" onclick="if(event.target===this)closeSettings()">
+  <div class="mbox glass-s rounded-2xl w-full max-w-lg mx-4 max-h-[85vh] overflow-hidden flex flex-col">
+    <div class="flex items-center justify-between p-5 pb-3 shrink-0">
+      <h3 class="font-mono font-semibold t1">设置</h3>
+      <button onclick="closeSettings()" class="ibtn"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg></button>
+    </div>
+    <!-- Tabs -->
+    <div class="flex gap-1 px-5 pb-3 overflow-x-auto shrink-0" style="scrollbar-width:none">
+      <button class="settings-tab active" onclick="setTab(this,'tabBm')">书签</button>
+      <button class="settings-tab" onclick="setTab(this,'tabEng')">搜索引擎</button>
+      <button class="settings-tab" onclick="setTab(this,'tabSync')">云同步</button>
+      <button class="settings-tab" onclick="setTab(this,'tabAccount')">账号</button>
+      <button class="settings-tab" onclick="setTab(this,'tabExt')">扩展</button>
+    </div>
+    <div class="flex-1 overflow-y-auto px-5 pb-5">
+      <!-- Tab: 书签 -->
+      <div id="tabBm" class="space-y-3">
+        <div><label class="block text-xs t3 mb-1">网址</label><input type="url" id="bmU" placeholder="https://example.com" class="w-full bg-black/5 dark:bg-white/5 border bsoft rounded-xl px-4 py-2.5 text-sm t1 placeholder:t3 outline-none focus:border-green-500/50"></div>
+        <div><div class="flex items-center gap-2 mb-1"><label class="block text-xs t3">标题</label><span id="bmHint" class="text-[10px] text-green-500 font-medium" style="display:none">自动识别</span></div><input type="text" id="bmT" placeholder="网站名称 (输入网址后自动填入)" class="w-full bg-black/5 dark:bg-white/5 border bsoft rounded-xl px-4 py-2.5 text-sm t1 placeholder:t3 outline-none focus:border-green-500/50"></div>
+        <div><label class="block text-xs t3 mb-1">描述</label><input type="text" id="bmD" placeholder="简短描述 (可选, 自动填入)" class="w-full bg-black/5 dark:bg-white/5 border bsoft rounded-xl px-4 py-2.5 text-sm t1 placeholder:t3 outline-none focus:border-green-500/50"></div>
+        <div><label class="block text-xs t3 mb-1">分类</label><select id="bmC" class="w-full bg-black/5 dark:bg-white/5 border bsoft rounded-xl px-4 py-2.5 text-sm t1 outline-none cursor-pointer"></select></div>
+        <button onclick="addBm()" class="w-full bg-green-500 hover:bg-green-400 rounded-xl py-2.5 text-sm font-semibold text-white transition-colors cursor-pointer">添加书签</button>
+      </div>
+      <!-- Tab: 搜索引擎 -->
+      <div id="tabEng" class="space-y-4" style="display:none">
+        <div>
+          <p class="text-xs t3 mb-2">当前引擎</p>
+          <div class="glass rounded-xl p-3 flex items-center gap-3"><span class="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold text-white" id="ceI" style="background:#3245FF">B</span><span class="text-sm font-medium t1" id="ceN2">百度</span></div>
+        </div>
+        <div>
+          <p class="text-xs t3 mb-2">预置引擎</p>
+          <div class="grid grid-cols-2 gap-2" id="epL"></div>
+        </div>
+        <div>
+          <p class="text-xs t3 mb-2">自定义引擎</p>
+          <div class="space-y-2" id="ecL"></div>
+        </div>
+        <div class="glass rounded-xl p-4 space-y-3">
+          <p class="text-xs font-medium t2">添加自定义引擎</p>
+          <input type="text" id="ceNI" placeholder="名称" class="w-full bg-black/5 dark:bg-white/5 border bsoft rounded-lg px-3 py-2 text-sm t1 placeholder:t3 outline-none focus:border-green-500/50">
+          <input type="text" id="ceUI" placeholder="URL (用 %s 代替关键词)" class="w-full bg-black/5 dark:bg-white/5 border bsoft rounded-lg px-3 py-2 text-sm t1 placeholder:t3 outline-none focus:border-green-500/50">
+          <button onclick="addCE()" class="w-full bg-green-500 hover:bg-green-400 rounded-lg py-2 text-sm font-semibold text-white transition-colors cursor-pointer">添加</button>
+        </div>
+      </div>
+      <!-- Tab: 云同步 -->
+      <div id="tabSync" class="space-y-4" style="display:none">
+        <div class="glass rounded-xl p-4">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-sm t1 font-medium">启用云同步</span>
+            <div class="w-11 h-6 bg-green-500 rounded-full flex items-center p-0.5 cursor-pointer" onclick="this.classList.toggle('bg-green-500');this.classList.toggle('bg-slate-600');this.querySelector('div').classList.toggle('ml-auto')"><div class="w-5 h-5 bg-white rounded-full shadow ml-auto transition-all"></div></div>
+          </div>
+          <p class="text-xs t3">登录账号后，书签和设置将自动跨设备同步。</p>
+        </div>
+        <div class="glass rounded-xl p-4 space-y-3">
+          <div class="flex items-center justify-between"><span class="text-xs t2">同步状态</span><span class="text-xs text-green-500 flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>已同步</span></div>
+          <div class="flex items-center justify-between"><span class="text-xs t2">上次同步</span><span class="text-xs t3">刚刚</span></div>
+          <div class="flex items-center justify-between"><span class="text-xs t2">书签数量</span><span class="text-xs t3" id="bmCount">0</span></div>
+        </div>
+        <div class="flex gap-3">
+          <button class="flex-1 glass rounded-xl py-2.5 text-sm font-medium cursor-pointer t2 hover:t1 transition-colors">导出数据</button>
+          <button class="flex-1 glass rounded-xl py-2.5 text-sm font-medium cursor-pointer t2 hover:t1 transition-colors">导入数据</button>
+        </div>
+      </div>
+      <!-- Tab: 账号 -->
+      <div id="tabAccount" class="space-y-4" style="display:none">
+        <div class="glass rounded-xl p-4 flex items-center gap-4">
+          <div class="w-12 h-12 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center text-white font-bold text-lg">?</div>
+          <div><p class="text-sm font-medium t1">未登录</p><p class="text-xs t3">登录后开启云同步和个性化设置</p></div>
+        </div>
+        <p class="text-xs t3">第三方账号登录</p>
+        <div class="space-y-2">
+          <button class="oauth-btn" onclick="mockLogin('Google')">
+            <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+            <span>Google 登录</span>
+          </button>
+          <button class="oauth-btn" onclick="mockLogin('GitHub')">
+            <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+            <span>GitHub 登录</span>
+          </button>
+          <button class="oauth-btn" onclick="mockLogin('微信')">
+            <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="#07C160"><path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 01.213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 00.167-.054l1.903-1.114a.864.864 0 01.717-.098 10.16 10.16 0 002.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.703-1.415 3.882-1.98 5.853-1.838-.576-3.583-4.196-6.348-8.596-6.348zM5.785 5.991c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 01-1.162 1.178A1.17 1.17 0 014.623 7.17c0-.651.52-1.18 1.162-1.18zm5.813 0c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 01-1.162 1.178 1.17 1.17 0 01-1.162-1.178c0-.651.52-1.18 1.162-1.18zm3.97 3.104c-1.413-.024-2.882.358-4.09 1.205-1.547 1.083-2.457 2.842-2.457 4.487 0 .197.019.388.048.578.177 1.14.756 2.177 1.592 2.97.835.791 1.953 1.388 3.162 1.6a7.426 7.426 0 002.209-.015.66.66 0 01.547.074l1.455.853a.25.25 0 00.127.04.224.224 0 00.222-.224c0-.055-.022-.109-.036-.163l-.298-1.132a.452.452 0 01.163-.508C19.731 17.614 20.7 16 20.7 14.205c0-2.692-2.202-5.021-5.132-5.11zm-1.906 2.965c.49 0 .888.404.888.901a.895.895 0 01-.888.9.895.895 0 01-.888-.9c0-.497.397-.9.888-.9zm4.444 0c.49 0 .888.404.888.901a.895.895 0 01-.888.9.895.895 0 01-.888-.9c0-.497.398-.9.888-.9z"/></svg>
+            <span>微信登录</span>
+          </button>
+          <button class="oauth-btn" onclick="mockLogin('QQ')">
+            <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="#12B7F5"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 14.19c-.33.26-.84.53-1.52.74.13.39.12.73-.04.95-.23.32-.72.33-1.22.18a4.1 4.1 0 01-1.02-.52c-.22.03-.44.05-.67.05h-.34c-.23 0-.45-.02-.67-.05-.29.22-.64.41-1.02.52-.5.15-.99.14-1.22-.18-.16-.22-.17-.56-.04-.95-.68-.21-1.19-.48-1.52-.74-.39-.3-.42-.55-.31-.66.11-.11.42-.06.82.2-.02-.45.05-.96.22-1.52-.8-1.1-1.32-2.49-1.32-3.43 0-2.19 2.3-3.97 5.14-3.97h.26c2.84 0 5.14 1.78 5.14 3.97 0 .94-.52 2.33-1.32 3.43.17.56.24 1.07.22 1.52.4-.26.71-.31.82-.2.11.11.08.36-.31.66z"/></svg>
+            <span>QQ 登录</span>
+          </button>
+          <button class="oauth-btn" onclick="mockLogin('Apple')">
+            <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="currentColor"><path d="M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.48-3.24 0-1.44.62-2.2.44-3.06-.4C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/></svg>
+            <span>Apple 登录</span>
+          </button>
+        </div>
+      </div>
+      <!-- Tab: 扩展 -->
+      <div id="tabExt" class="space-y-4" style="display:none">
+        <div class="flex gap-3"><div class="w-8 h-8 rounded-lg bg-green-500/15 flex items-center justify-center shrink-0 mt-0.5"><svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21v-8.25M15.75 21v-8.25M8.25 21v-8.25M3 9l9-6 9 6"/></svg></div><div class="text-sm t2"><h4 class="font-semibold t1 mb-1">新标签页替换</h4><p>安装后新标签页自动打开 AI导航。</p></div></div>
+        <div class="flex gap-3"><div class="w-8 h-8 rounded-lg bg-blue-500/15 flex items-center justify-center shrink-0 mt-0.5"><svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0111.186 0z"/></svg></div><div class="text-sm t2"><h4 class="font-semibold t1 mb-1">一键收藏</h4><p>点击扩展图标，自动抓取当前页面标题和 URL。</p></div></div>
+        <div class="flex gap-3"><div class="w-8 h-8 rounded-lg bg-purple-500/15 flex items-center justify-center shrink-0 mt-0.5"><svg class="w-4 h-4 text-purple-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5"/></svg></div><div class="text-sm t2"><h4 class="font-semibold t1 mb-1">跨设备同步</h4><p>基于 chrome.storage.sync 自动云同步。</p></div></div>
+        <div class="rounded-xl p-4" style="background:rgba(34,197,94,.06)">
+          <p class="font-mono text-xs t3 mb-2">manifest.json</p>
+          <pre class="text-xs t1 font-mono overflow-x-auto"><code>{ "manifest_version": 3,
+  "name": "AI导航",
+  "chrome_url_overrides": { "newtab": "index.html" },
+  "action": { "default_popup": "popup.html" },
+  "permissions": ["storage", "activeTab"] }</code></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// Chrome Extension: sync localStorage ↔ chrome.storage.sync
+const _isExt=typeof chrome!=='undefined'&&chrome.storage&&chrome.storage.sync;
+if(_isExt){
+  chrome.storage.sync.get(null,items=>{for(const[k,v]of Object.entries(items||{})){if(k.startsWith('ainav_'))localStorage.setItem(k,v)}});
+  const _origSet=localStorage.setItem.bind(localStorage);
+  localStorage.setItem=function(k,v){_origSet(k,v);if(k.startsWith('ainav_'))chrome.storage.sync.set({[k]:v})};
+}
+const ENG=[
+  {id:'baidu',n:'百度',u:'https://www.baidu.com/s?wd=',i:'B',c:'#3245FF'},
+  {id:'google',n:'Google',u:'https://www.google.com/search?q=',i:'G',c:'#4285F4'},
+  {id:'bing',n:'必应',u:'https://www.bing.com/search?q=',i:'B',c:'#00897B'},
+  {id:'sogou',n:'搜狗',u:'https://www.sogou.com/web?query=',i:'S',c:'#FF6600'},
+  {id:'yandex',n:'Yandex',u:'https://yandex.com/search/?text=',i:'Y',c:'#FF0000'},
+  {id:'ddg',n:'DuckDuckGo',u:'https://duckduckgo.com/?q=',i:'D',c:'#DE5833'},
+  {id:'pplx',n:'Perplexity',u:'https://www.perplexity.ai/search?q=',i:'P',c:'#20B2AA'},
+  {id:'chatgpt',n:'ChatGPT',u:'https://chat.openai.com/?q=',i:'C',c:'#10A37F'},
+  {id:'nano',n:'纳米搜索',u:'https://www.n.cn?q=',i:'N',c:'#6366F1'},
+  {id:'metaso',n:'秘塔搜索',u:'https://metaso.cn/?q=',i:'秘',c:'#4F46E5'},
+  {id:'tiangong',n:'天工AI',u:'https://www.tiangong.cn/search?q=',i:'天',c:'#0EA5E9'},
+  {id:'doubao',n:'豆包',u:'https://www.doubao.com/search?q=',i:'豆',c:'#6C5CE7'},
+];
+let ceList=JSON.parse(localStorage.getItem('ainav_ce')||'[]');
+let curEng=ENG[0];
+(function(){const s=localStorage.getItem('ainav_eng');if(s){const f=ENG.find(e=>e.id===s)||ceList.find(e=>e.id===s);if(f)curEng=f}})();
+
+const S={
+'AI 官网':[
+  {t:'ChatGPT',u:'chat.openai.com',d:'OpenAI 对话 AI'},{t:'Claude',u:'claude.ai',d:'Anthropic 智能助手'},{t:'Gemini',u:'gemini.google.com',d:'Google AI 模型'},{t:'Perplexity',u:'perplexity.ai',d:'AI 搜索引擎'},{t:'Midjourney',u:'midjourney.com',d:'AI 图像生成'},{t:'Stable Diffusion',u:'stability.ai',d:'开源 AI 图像'},{t:'Suno AI',u:'suno.com',d:'AI 音乐创作'},{t:'Kimi',u:'kimi.moonshot.cn',d:'长文本 AI'},{t:'通义千问',u:'tongyi.aliyun.com',d:'阿里云 AI'},{t:'文心一言',u:'yiyan.baidu.com',d:'百度大模型'},{t:'豆包',u:'www.doubao.com',d:'字节跳动 AI'},{t:'DeepSeek',u:'chat.deepseek.com',d:'深度求索 AI'},{t:'智谱清言',u:'chatglm.cn',d:'智谱 AI'},{t:'讯飞星火',u:'xinghuo.xfyun.cn',d:'科大讯飞 AI'},{t:'天工 AI',u:'www.tiangong.cn',d:'昆仑万维'},{t:'Poe',u:'poe.com',d:'多模型聚合'},{t:'Copilot',u:'copilot.microsoft.com',d:'微软 AI'},{t:'Grok',u:'grok.com',d:'xAI 模型'},{t:'Runway',u:'runwayml.com',d:'AI 视频生成'},{t:'ElevenLabs',u:'elevenlabs.io',d:'AI 语音合成'},{t:'Character.AI',u:'character.ai',d:'AI 角色对话'},{t:'Jasper',u:'jasper.ai',d:'AI 营销写作'},{t:'Notion AI',u:'notion.so/product/ai',d:'AI 知识助手'},{t:'Udio',u:'udio.com',d:'AI 音乐生成'},{t:'扣子',u:'www.coze.cn',d:'字节 AI 开发'},{t:'海螺 AI',u:'hailuoai.com',d:'MiniMax 助手'},{t:'秘塔搜索',u:'metaso.cn',d:'AI 搜索'},{t:'Luma AI',u:'lumalabs.ai',d:'AI 3D/视频'},{t:'Ideogram',u:'ideogram.ai',d:'AI 图文生成'},{t:'通义万相',u:'wanx.aliyun.com',d:'阿里 AI 绘画'},
+],
+'开发工具':[
+  {t:'GitHub',u:'github.com',d:'代码托管协作'},{t:'GitLab',u:'gitlab.com',d:'DevOps 平台'},{t:'Gitee',u:'gitee.com',d:'国内代码托管'},{t:'Bitbucket',u:'bitbucket.org',d:'Atlassian 托管'},{t:'VS Code',u:'code.visualstudio.com',d:'微软编辑器'},{t:'Cursor',u:'cursor.sh',d:'AI 编辑器'},{t:'Windsurf',u:'windsurf.com',d:'AI IDE'},{t:'Zed',u:'zed.dev',d:'高性能编辑器'},{t:'JetBrains',u:'jetbrains.com',d:'专业 IDE'},{t:'Docker Hub',u:'hub.docker.com',d:'容器镜像'},{t:'Vercel',u:'vercel.com',d:'前端部署'},{t:'Netlify',u:'netlify.com',d:'静态站部署'},{t:'Railway',u:'railway.app',d:'全栈云部署'},{t:'Render',u:'render.com',d:'云应用托管'},{t:'Supabase',u:'supabase.com',d:'开源 BaaS'},{t:'Firebase',u:'firebase.google.com',d:'Google BaaS'},{t:'Figma',u:'figma.com',d:'协作设计'},{t:'Notion',u:'notion.so',d:'全能工作空间'},{t:'Linear',u:'linear.app',d:'项目管理'},{t:'Jira',u:'atlassian.com/software/jira',d:'项目管理'},{t:'Postman',u:'postman.com',d:'API 调试'},{t:'Insomnia',u:'insomnia.rest',d:'API 客户端'},{t:'Bruno',u:'usebruno.com',d:'开源 API 调试'},{t:'Cloudflare',u:'dash.cloudflare.com',d:'CDN 安全'},{t:'Sentry',u:'sentry.io',d:'错误监控'},{t:'Grafana',u:'grafana.com',d:'监控可视化'},{t:'Terraform',u:'terraform.io',d:'IaC 工具'},{t:'Warp',u:'warp.dev',d:'AI 终端'},{t:'CodePen',u:'codepen.io',d:'前端实验场'},{t:'StackBlitz',u:'stackblitz.com',d:'浏览器 IDE'},{t:'Replit',u:'replit.com',d:'在线 IDE'},{t:'CodeSandbox',u:'codesandbox.io',d:'在线沙盒'},{t:'npm',u:'npmjs.com',d:'Node 包管理'},{t:'PyPI',u:'pypi.org',d:'Python 包'},{t:'MDN',u:'developer.mozilla.org',d:'Web 文档'},{t:'Can I Use',u:'caniuse.com',d:'浏览器兼容'},{t:'Regex101',u:'regex101.com',d:'正则测试'},{t:'Excalidraw',u:'excalidraw.com',d:'手绘白板'},{t:'TypeScript',u:'typescriptlang.org',d:'TS 文档'},{t:'Tailwind',u:'tailwindcss.com',d:'原子 CSS'},{t:'Vite',u:'vite.dev',d:'构建工具'},{t:'DevDocs',u:'devdocs.io',d:'聚合文档'},{t:'Bundlephobia',u:'bundlephobia.com',d:'包体积分析'},{t:'JSON Editor',u:'jsoneditoronline.org',d:'JSON 编辑'},{t:'JSFiddle',u:'jsfiddle.net',d:'JS 在线测试'},{t:'Glitch',u:'glitch.com',d:'在线应用搭建'},{t:'Codeium',u:'codeium.com',d:'AI 代码补全'},{t:'Sourcegraph',u:'sourcegraph.com',d:'代码搜索'},{t:'Trae',u:'trae.ai',d:'字节跳动 AI IDE'},{t:'Claude Code',u:'claude.ai',d:'Anthropic 终端编程'},{t:'Codex',u:'chatgpt.com',d:'OpenAI 编程智能体'},{t:'Lovable',u:'lovable.dev',d:'自然语言建站'},{t:'Bolt',u:'bolt.new',d:'AI 全栈搭建'},{t:'v0',u:'v0.dev',d:'Vercel AI UI'},{t:'AiPy',u:'aipy.com',d:'零代码 AI 编程'},{t:'Qoder',u:'qoder.ai',d:'阿里智能编码'},{t:'CodeBuddy',u:'codebuddy.qq.com',d:'腾讯 AI 编码'},{t:'灵珠',u:'lzhu.cn',d:'DeepSeek 应用创作'},{t:'码上飞',u:'mashangfei.com',d:'AI 生成应用'},{t:'美团 NoCode',u:'nocode.meituan.com',d:'零代码平台'},{t:'Devin',u:'devin.ai',d:'AI 软件工程师'},{t:'GitHub Copilot',u:'github.com/features/copilot',d:'AI 结对编程'},
+],
+'API 服务':[
+  {t:'OpenAI API',u:'platform.openai.com',d:'GPT / DALL-E'},{t:'Anthropic',u:'console.anthropic.com',d:'Claude API'},{t:'Google AI',u:'aistudio.google.com',d:'Gemini API'},{t:'Hugging Face',u:'huggingface.co',d:'开源模型'},{t:'Replicate',u:'replicate.com',d:'云端推理'},{t:'Together AI',u:'together.ai',d:'开源推理'},{t:'硅基流动',u:'siliconflow.cn',d:'国产 API'},{t:'Cohere',u:'cohere.com',d:'企业 AI'},{t:'Groq',u:'groq.com',d:'高速推理'},{t:'Mistral',u:'mistral.ai',d:'欧洲 AI'},{t:'AWS Bedrock',u:'aws.amazon.com/bedrock',d:'亚马逊 AI'},{t:'Azure AI',u:'ai.azure.com',d:'微软 AI'},{t:'OpenRouter',u:'openrouter.ai',d:'多模型路由'},{t:'Fireworks',u:'fireworks.ai',d:'快速推理'},{t:'Deepinfra',u:'deepinfra.com',d:'低成本推理'},{t:'百炼',u:'bailian.console.aliyun.com',d:'阿里模型服务'},{t:'Pinecone',u:'pinecone.io',d:'向量数据库'},{t:'Weaviate',u:'weaviate.io',d:'向量搜索'},{t:'LangChain',u:'langchain.com',d:'LLM 框架'},{t:'Stripe',u:'stripe.com/docs/api',d:'支付 API'},{t:'Twilio',u:'twilio.com',d:'通信 API'},{t:'Algolia',u:'algolia.com',d:'搜索 API'},
+],
+'常用网站':[
+  {t:'百度',u:'baidu.com',d:'搜索引擎'},{t:'哔哩哔哩',u:'bilibili.com',d:'视频弹幕'},{t:'知乎',u:'zhihu.com',d:'知识问答'},{t:'微博',u:'weibo.com',d:'社交媒体'},{t:'淘宝',u:'taobao.com',d:'综合购物'},{t:'京东',u:'jd.com',d:'自营电商'},{t:'拼多多',u:'pinduoduo.com',d:'社交电商'},{t:'抖音',u:'douyin.com',d:'短视频'},{t:'小红书',u:'xiaohongshu.com',d:'生活分享'},{t:'今日头条',u:'toutiao.com',d:'信息流'},{t:'豆瓣',u:'douban.com',d:'影评书评'},{t:'微信读书',u:'weread.qq.com',d:'在线阅读'},{t:'飞书',u:'feishu.cn',d:'企业协作'},{t:'钉钉',u:'dingtalk.com',d:'企业办公'},{t:'语雀',u:'yuque.com',d:'知识管理'},{t:'WPS',u:'kdocs.cn',d:'在线办公'},{t:'腾讯文档',u:'docs.qq.com',d:'协作文档'},{t:'石墨文档',u:'shimo.im',d:'云端文档'},{t:'携程',u:'ctrip.com',d:'旅行预订'},{t:'美团',u:'meituan.com',d:'生活服务'},{t:'大众点评',u:'dianping.com',d:'餐饮点评'},{t:'12306',u:'12306.cn',d:'铁路购票'},{t:'高德地图',u:'amap.com',d:'地图导航'},{t:'天眼查',u:'tianyancha.com',d:'企业查询'},{t:'网易',u:'163.com',d:'综合门户'},{t:'腾讯网',u:'qq.com',d:'综合门户'},{t:'闲鱼',u:'2.taobao.com',d:'二手交易'},{t:'唯品会',u:'vip.com',d:'品牌特卖'},{t:'苏宁',u:'suning.com',d:'家电数码'},{t:'58同城',u:'58.com',d:'分类信息'},{t:'链家',u:'lianjia.com',d:'房产中介'},{t:'汽车之家',u:'autohome.com.cn',d:'汽车资讯'},
+],
+'国际网站':[
+  {t:'Google',u:'google.com',d:'全球搜索'},{t:'Wikipedia',u:'wikipedia.org',d:'自由百科'},{t:'Reddit',u:'reddit.com',d:'社区论坛'},{t:'X / Twitter',u:'x.com',d:'社交媒体'},{t:'Facebook',u:'facebook.com',d:'社交网络'},{t:'Instagram',u:'instagram.com',d:'图片社交'},{t:'LinkedIn',u:'linkedin.com',d:'职业社交'},{t:'Amazon',u:'amazon.com',d:'全球电商'},{t:'eBay',u:'ebay.com',d:'拍卖电商'},{t:'WhatsApp',u:'web.whatsapp.com',d:'即时通讯'},{t:'Telegram',u:'web.telegram.org',d:'加密通讯'},{t:'Discord',u:'discord.com',d:'社群通讯'},{t:'Slack',u:'slack.com',d:'团队协作'},{t:'Medium',u:'medium.com',d:'博客平台'},{t:'Substack',u:'substack.com',d:'邮件订阅'},{t:'Quora',u:'quora.com',d:'问答社区'},{t:'TikTok',u:'tiktok.com',d:'短视频'},{t:'Zoom',u:'zoom.us',d:'视频会议'},{t:'Notion',u:'notion.so',d:'工作空间'},{t:'Walmart',u:'walmart.com',d:'零售电商'},{t:'Pinterest',u:'pinterest.com',d:'图片灵感'},{t:'Airbnb',u:'airbnb.com',d:'民宿短租'},{t:'Uber',u:'uber.com',d:'出行服务'},{t:'Booking',u:'booking.com',d:'酒店预订'},{t:'PayPal',u:'paypal.com',d:'在线支付'},{t:'Etsy',u:'etsy.com',d:'手工电商'},
+],
+'技术社区':[
+  {t:'CSDN',u:'csdn.net',d:'开发者社区'},{t:'掘金',u:'juejin.cn',d:'技术平台'},{t:'SegmentFault',u:'segmentfault.com',d:'技术问答'},{t:'V2EX',u:'v2ex.com',d:'创意社区'},{t:'Stack Overflow',u:'stackoverflow.com',d:'编程问答'},{t:'Dev.to',u:'dev.to',d:'开发者社区'},{t:'Hacker News',u:'news.ycombinator.com',d:'科技新闻'},{t:'Product Hunt',u:'producthunt.com',d:'新产品发现'},{t:'InfoQ',u:'infoq.cn',d:'技术资讯'},{t:'OSChina',u:'oschina.net',d:'开源中国'},{t:'LeetCode',u:'leetcode.cn',d:'算法刷题'},{t:'牛客',u:'nowcoder.com',d:'求职刷题'},{t:'Hashnode',u:'hashnode.com',d:'开发者博客'},{t:'36氪',u:'36kr.com',d:'科技资讯'},{t:'少数派',u:'sspai.com',d:'数字生活'},{t:'Lobsters',u:'lobste.rs',d:'技术链接'},{t:'Ruby China',u:'ruby-china.org',d:'Ruby 社区'},{t:'IndieHackers',u:'indiehackers.com',d:'独立开发者'},
+],
+'影音娱乐':[
+  {t:'YouTube',u:'youtube.com',d:'全球视频'},{t:'Netflix',u:'netflix.com',d:'影视流媒体'},{t:'Spotify',u:'spotify.com',d:'音乐流媒体'},{t:'Disney+',u:'disneyplus.com',d:'迪士尼影视'},{t:'哔哩哔哩',u:'bilibili.com',d:'视频弹幕'},{t:'爱奇艺',u:'iqiyi.com',d:'视频平台'},{t:'优酷',u:'youku.com',d:'视频平台'},{t:'腾讯视频',u:'v.qq.com',d:'视频平台'},{t:'芒果TV',u:'mgtv.com',d:'湖南卫视'},{t:'网易云音乐',u:'music.163.com',d:'音乐平台'},{t:'QQ音乐',u:'y.qq.com',d:'音乐平台'},{t:'Twitch',u:'twitch.tv',d:'游戏直播'},{t:'斗鱼',u:'douyu.com',d:'游戏直播'},{t:'虎牙',u:'huya.com',d:'游戏直播'},{t:'Steam',u:'store.steampowered.com',d:'游戏商店'},{t:'Epic Games',u:'epicgames.com',d:'游戏商店'},{t:'IMDb',u:'imdb.com',d:'影视数据库'},{t:'Apple Music',u:'music.apple.com',d:'苹果音乐'},{t:'Max',u:'max.com',d:'HBO 流媒体'},{t:'Prime Video',u:'primevideo.com',d:'亚马逊视频'},{t:'咪咕视频',u:'miguvideo.com',d:'咪咕影视'},{t:'酷狗音乐',u:'kugou.com',d:'音乐平台'},{t:'SoundCloud',u:'soundcloud.com',d:'音乐分享'},
+],
+'设计资源':[
+  {t:'Dribbble',u:'dribbble.com',d:'设计展示'},{t:'Behance',u:'behance.net',d:'创意作品'},{t:'Pinterest',u:'pinterest.com',d:'图片灵感'},{t:'Unsplash',u:'unsplash.com',d:'免费图片'},{t:'Pexels',u:'pexels.com',d:'免费素材'},{t:'IconFont',u:'iconfont.cn',d:'阿里图标'},{t:'Lucide',u:'lucide.dev',d:'开源图标'},{t:'Heroicons',u:'heroicons.com',d:'Tailwind 图标'},{t:'Coolors',u:'coolors.co',d:'配色生成'},{t:'Mobbin',u:'mobbin.com',d:'设计参考'},{t:'Awwwards',u:'awwwards.com',d:'设计奖'},{t:'Canva',u:'canva.com',d:'在线设计'},{t:'Remove.bg',u:'remove.bg',d:'AI 去背景'},{t:'LottieFiles',u:'lottiefiles.com',d:'动画资源'},{t:'Framer',u:'framer.com',d:'交互原型'},{t:'Whimsical',u:'whimsical.com',d:'流程图'},{t:'Adobe Color',u:'color.adobe.com',d:'Adobe 配色'},{t:'Material Design',u:'m3.material.io',d:'Google 设计'},{t:'Ant Design',u:'ant.design',d:'蚂蚁设计系统'},{t:'Figma Community',u:'figma.com/community',d:'Figma 模板'},
+],
+'教育学习':[
+  {t:'Coursera',u:'coursera.org',d:'名校在线课程'},{t:'Udemy',u:'udemy.com',d:'技能课程'},{t:'edX',u:'edx.org',d:'大学公开课'},{t:'Khan Academy',u:'khanacademy.org',d:'免费教育'},{t:'Codecademy',u:'codecademy.com',d:'编程学习'},{t:'freeCodeCamp',u:'freecodecamp.org',d:'免费学编程'},{t:'W3Schools',u:'w3schools.com',d:'Web 教程'},{t:'Kaggle',u:'kaggle.com',d:'数据科学'},{t:'Brilliant',u:'brilliant.org',d:'数理思维'},{t:'Duolingo',u:'duolingo.com',d:'语言学习'},{t:'中国大学MOOC',u:'icourse163.org',d:'国家精品课'},{t:'学堂在线',u:'xuetangx.com',d:'清华慕课'},{t:'慕课网',u:'imooc.com',d:'IT 技能学习'},{t:'网易公开课',u:'open.163.com',d:'公开课'},{t:'极客时间',u:'time.geekbang.org',d:'技术专栏'},{t:'Skillshare',u:'skillshare.com',d:'创意课程'},{t:'Pluralsight',u:'pluralsight.com',d:'技术培训'},{t:'LinkedIn Learning',u:'linkedin.com/learning',d:'职业课程'},{t:'腾讯课堂',u:'ke.qq.com',d:'在线课堂'},{t:'知乎知学堂',u:'zhihu.com/education',d:'知乎教育'},
+],
+'新闻资讯':[
+  {t:'新华网',u:'xinhuanet.com',d:'国家通讯社'},{t:'人民网',u:'people.com.cn',d:'人民日报'},{t:'央视网',u:'cctv.com',d:'央视新闻'},{t:'澎湃新闻',u:'thepaper.cn',d:'时政深度'},{t:'界面新闻',u:'jiemian.com',d:'商业财经'},{t:'观察者网',u:'guancha.cn',d:'时政评论'},{t:'凤凰网',u:'ifeng.com',d:'综合资讯'},{t:'南方周末',u:'infzm.com',d:'深度报道'},{t:'BBC',u:'bbc.com',d:'英国广播'},{t:'CNN',u:'cnn.com',d:'美国有线'},{t:'Reuters',u:'reuters.com',d:'路透社'},{t:'The Verge',u:'theverge.com',d:'科技资讯'},{t:'TechCrunch',u:'techcrunch.com',d:'科技创业'},{t:'Wired',u:'wired.com',d:'科技文化'},{t:'Ars Technica',u:'arstechnica.com',d:'技术深度'},{t:'The Guardian',u:'theguardian.com',d:'卫报新闻'},{t:'AP News',u:'apnews.com',d:'美联社'},{t:'NHK',u:'www3.nhk.or.jp',d:'日本放送'},
+],
+'金融理财':[
+  {t:'东方财富',u:'eastmoney.com',d:'财经门户'},{t:'同花顺',u:'10jqka.com.cn',d:'股票软件'},{t:'雪球',u:'xueqiu.com',d:'投资社区'},{t:'富途牛牛',u:'futunn.com',d:'港美股'},{t:'老虎证券',u:'tigerbrokers.com',d:'美港股'},{t:'天天基金',u:'fund.eastmoney.com',d:'基金平台'},{t:'蚂蚁财富',u:'antfortune.com',d:'综合理财'},{t:'Bloomberg',u:'bloomberg.com',d:'彭博财经'},{t:'Yahoo Finance',u:'finance.yahoo.com',d:'雅虎财经'},{t:'MarketWatch',u:'marketwatch.com',d:'市场观察'},{t:'Investing',u:'investing.com',d:'投资数据'},{t:'CoinMarketCap',u:'coinmarketcap.com',d:'加密行情'},{t:'CoinGecko',u:'coingecko.com',d:'加密数据'},{t:'Binance',u:'binance.com',d:'加密交易所'},{t:'招商银行',u:'cmbchina.com',d:'招行网银'},{t:'支付宝',u:'alipay.com',d:'支付服务'},
+],
+'云服务':[
+  {t:'AWS',u:'aws.amazon.com',d:'亚马逊云'},{t:'Google Cloud',u:'cloud.google.com',d:'谷歌云'},{t:'Azure',u:'azure.microsoft.com',d:'微软云'},{t:'阿里云',u:'aliyun.com',d:'阿里云计算'},{t:'腾讯云',u:'cloud.tencent.com',d:'腾讯云计算'},{t:'华为云',u:'huaweicloud.com',d:'华为云计算'},{t:'百度智能云',u:'cloud.baidu.com',d:'百度云'},{t:'火山引擎',u:'volcengine.com',d:'字节跳动云'},{t:'DigitalOcean',u:'digitalocean.com',d:'开发者云'},{t:'Vultr',u:'vultr.com',d:'云服务器'},{t:'Linode',u:'linode.com',d:'Akamai 云'},{t:'Hetzner',u:'hetzner.com',d:'欧洲云服务器'},{t:'Fly.io',u:'fly.io',d:'边缘部署'},{t:'PlanetScale',u:'planetscale.com',d:'Serverless DB'},{t:'Neon',u:'neon.tech',d:'Serverless PG'},{t:'Upstash',u:'upstash.com',d:'Serverless Redis'},{t:'Zeabur',u:'zeabur.com',d:'一键部署'},{t:'京东云',u:'jdcloud.com',d:'京东云计算'},
+],
+'自定义':[],
+};
+let cbm=JSON.parse(localStorage.getItem('ainav_bm')||'[]');
+S['自定义']=cbm;
+const CK=Object.keys(S);
+let curCat=CK[0];
+let expanded=false;
+
+function fav(u){return'https://www.google.com/s2/favicons?sz=64&domain='+u}
+
+// Particles
+!function(){const c=document.getElementById('particles');for(let i=0;i<30;i++){const p=document.createElement('div');p.className='particle';p.style.left=Math.random()*100+'%';p.style.animationDuration=(8+Math.random()*14)+'s';p.style.animationDelay=(Math.random()*10)+'s';const s=2+Math.random()*2;p.style.width=p.style.height=s+'px';p.style.background=['rgba(34,197,94,.3)','rgba(59,130,246,.2)','rgba(168,85,247,.2)'][Math.floor(Math.random()*3)];c.appendChild(p)}}();
+
+// Theme
+let dark=true;
+!function(){if(localStorage.getItem('ainav_th')==='light'){dark=false;document.documentElement.classList.remove('dark')}}();
+function toggleTheme(){
+  const btn=document.getElementById('themeBtn');
+  const r=btn.getBoundingClientRect();
+  const cx=r.left+r.width/2,cy=r.top+r.height/2;
+  const maxR=Math.hypot(Math.max(cx,innerWidth-cx),Math.max(cy,innerHeight-cy))*2;
+  const next=!dark;
+  const rip=document.createElement('div');
+  rip.className='theme-ripple';
+  rip.style.cssText=`left:${cx-maxR/2}px;top:${cy-maxR/2}px;width:${maxR}px;height:${maxR}px;background:${next?'#0F172A':'#F1F5F9'}`;
+  document.body.appendChild(rip);
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+    rip.classList.add('run');
+    rip.addEventListener('transitionend',()=>{
+      const noT=document.createElement('style');noT.textContent='*,*::before,*::after{transition-duration:0s!important}';document.head.appendChild(noT);
+      dark=next;
+      document.documentElement.classList.toggle('dark',dark);
+      document.querySelector('.ico-sun').style.display=dark?'block':'none';
+      document.querySelector('.ico-moon').style.display=dark?'none':'block';
+      localStorage.setItem('ainav_th',dark?'dark':'light');
+      document.body.offsetHeight;
+      rip.remove();
+      requestAnimationFrame(()=>noT.remove());
+    },{once:true});
+  }));
+}
+if(!dark){document.querySelector('.ico-sun').style.display='none';document.querySelector('.ico-moon').style.display='block'}
+
+// Expand / Collapse
+function expand(){
+  if(expanded)return;expanded=true;
+  document.getElementById('hero').classList.remove('centered');
+  document.getElementById('hero').classList.add('docked');
+  document.querySelectorAll('.revealable').forEach((el,i)=>setTimeout(()=>el.classList.add('show'),i*80));
+  renderGrid();
+}
+function collapse(){
+  if(!expanded)return;expanded=false;
+  document.getElementById('hero').classList.add('centered');
+  document.getElementById('hero').classList.remove('docked');
+  document.querySelectorAll('.revealable').forEach(el=>el.classList.remove('show'));
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+document.addEventListener('click',e=>{
+  if(e.target.closest('.overlay')||e.target.closest('#themeBtn')||e.target.closest('#settingsBtn')||e.target.closest('#si')||e.target.closest('button[onclick*="doSearch"]'))return;
+  if(e.target.closest('.nav-card')||e.target.closest('.cat-pill')||e.target.closest('#setOv'))return;
+  if(!expanded)expand();
+  else if(!e.target.closest('#grid')&&!e.target.closest('#catTabs')&&!e.target.closest('#hero'))collapse();
+});
+
+// Search
+function doSearch(){const q=document.getElementById('si').value.trim();if(!q)return;const u=curEng.u.includes('%s')?curEng.u.replace('%s',encodeURIComponent(q)):curEng.u+encodeURIComponent(q);window.open(u,'_blank')}
+
+// Categories
+function renderCats(){
+  const c=document.getElementById('catTabs');c.innerHTML='';
+  CK.forEach(k=>{const b=document.createElement('button');b.className='cat-pill shrink-0 px-4 py-2 rounded-xl text-sm font-medium border border-transparent '+(k===curCat?'active':'');b.textContent=k;b.onclick=e=>{e.stopPropagation();curCat=k;renderCats();renderGrid()};c.appendChild(b)});
+}
+
+// Grid
+function renderGrid(){
+  const g=document.getElementById('grid'),items=S[curCat]||[];g.innerHTML='';
+  if(!items.length){g.innerHTML='<div class="col-span-full flex flex-col items-center py-16 t3"><svg class="w-10 h-10 mb-3 opacity-30" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0111.186 0z"/></svg><p class="text-sm mb-3">暂无书签</p><button onclick="event.stopPropagation();openSettings()" class="px-4 py-2 bg-green-500/15 text-green-500 rounded-lg text-xs cursor-pointer">添加第一个</button></div>';return}
+  items.forEach((it,i)=>{const a=document.createElement('a');a.href='https://'+it.u;a.target='_blank';a.rel='noopener noreferrer';a.className='nav-card glass rounded-xl p-3 stag';a.style.animationDelay=(i*20)+'ms';a.onclick=e=>e.stopPropagation();a.innerHTML=`<img src="${fav(it.u)}" alt="" class="site-icon" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><span class="w-8 h-8 rounded-lg bg-green-500/10 items-center justify-center text-xs font-bold text-green-500 font-mono" style="display:none">${it.t.charAt(0)}</span><span class="text-xs font-medium t1 truncate w-full">${it.t}</span><span class="text-[10px] t3 truncate w-full leading-tight">${it.d||it.u}</span>`;g.appendChild(a)});
+  updateBmCount();
+}
+
+// Settings
+function openSettings(){document.getElementById('setOv').classList.add('open');renderEngTab();initBmSelect();updateBmCount()}
+function closeSettings(){document.getElementById('setOv').classList.remove('open')}
+function setTab(btn,id){
+  btn.parentElement.querySelectorAll('.settings-tab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  ['tabBm','tabEng','tabSync','tabAccount','tabExt'].forEach(t=>document.getElementById(t).style.display='none');
+  document.getElementById(id).style.display='';
+}
+function initBmSelect(){const s=document.getElementById('bmC');s.innerHTML='';CK.forEach(k=>{const o=document.createElement('option');o.value=k;o.textContent=k;o.style.background='#1E293B';s.appendChild(o)});s.value='自定义'}
+function addBm(){const u=document.getElementById('bmU').value.trim().replace(/^https?:\/\//,''),t=document.getElementById('bmT').value.trim(),d=document.getElementById('bmD').value.trim(),cat=document.getElementById('bmC').value;if(!u||!t)return;const it={t,u,d};S[cat].push(it);if(cat==='自定义'){cbm.push(it);localStorage.setItem('ainav_bm',JSON.stringify(cbm))}['bmU','bmT','bmD'].forEach(id=>{const el=document.getElementById(id);el.value='';delete el.dataset.manual});document.getElementById('bmHint').style.display='none';if(curCat===cat&&expanded)renderGrid();updateBmCount()}
+let _bmTimer=0,_bmAbort=null;
+function bmDomain(url){return url.split('/')[0].replace(/^www\./,'')}
+function bmFallbackTitle(host){const parts=host.split('.');const name=parts.length>1?parts.slice(0,-1).join('.'):parts[0];const clean=name.replace(/\.(com|org|net|co|ac|edu|gov)$/,'');return clean.charAt(0).toUpperCase()+clean.slice(1)}
+function bmAutoFill(){
+  const raw=document.getElementById('bmU').value.trim();
+  const url=raw.replace(/^https?:\/\//,'').replace(/\/+$/,'');
+  const tEl=document.getElementById('bmT'),dEl=document.getElementById('bmD'),cEl=document.getElementById('bmC'),hint=document.getElementById('bmHint');
+  if(_bmAbort){_bmAbort.abort();_bmAbort=null}
+  if(!url){hint.style.display='none';hint.textContent='自动识别';return}
+  delete tEl.dataset.manual;delete dEl.dataset.manual;
+  const host=bmDomain(url);
+  let found=null,foundCat='自定义';
+  for(const cat of CK){for(const it of S[cat]){if(bmDomain(it.u)===host){found=it;foundCat=cat;break}}if(found)break}
+  if(found){
+    tEl.value=found.t;dEl.value=found.d;cEl.value=foundCat;hint.textContent='自动识别';hint.style.display='';return;
+  }
+  tEl.value=bmFallbackTitle(host);dEl.value='';cEl.value='自定义';
+  hint.textContent='识别中...';hint.style.display='';
+  const fullUrl=(raw.startsWith('http')?raw:'https://'+url);
+  _bmAbort=new AbortController();
+  fetch('https://api.microlink.io?url='+encodeURIComponent(fullUrl),{signal:_bmAbort.signal})
+    .then(r=>r.json()).then(j=>{
+      _bmAbort=null;
+      if(j.status!=='success'||!j.data)throw 0;
+      const d=j.data;
+      if(d.title&&!tEl.dataset.manual){
+        let t=d.title.replace(/\s*[-–—|·•].{0,30}$/,'').trim();
+        if(t.length>20)t=t.slice(0,20);
+        tEl.value=t;
+      }
+      if(d.description&&!dEl.dataset.manual){
+        let desc=d.description;
+        if(desc.length>15)desc=desc.slice(0,15)+'…';
+        dEl.value=desc;
+      }
+      hint.textContent='自动识别';
+    }).catch(()=>{_bmAbort=null;hint.textContent='';hint.style.display='none'});
+}
+!function(){
+  const uEl=document.getElementById('bmU'),tEl=document.getElementById('bmT'),dEl=document.getElementById('bmD');
+  uEl.addEventListener('input',()=>{clearTimeout(_bmTimer);_bmTimer=setTimeout(bmAutoFill,500)});
+  uEl.addEventListener('paste',()=>{clearTimeout(_bmTimer);_bmTimer=setTimeout(bmAutoFill,200)});
+  tEl.addEventListener('input',()=>{tEl.dataset.manual='1'});
+  dEl.addEventListener('input',()=>{dEl.dataset.manual='1'});
+}();
+function updateBmCount(){let n=0;CK.forEach(k=>n+=S[k].length);const el=document.getElementById('bmCount');if(el)el.textContent=n}
+
+// Engine tab
+function renderEngTab(){
+  document.getElementById('ceI').textContent=curEng.i;document.getElementById('ceI').style.background=curEng.c;document.getElementById('ceN2').textContent=curEng.n;
+  const pl=document.getElementById('epL');pl.innerHTML='';
+  ENG.forEach(e=>{const d=document.createElement('div');d.className='dd-opt glass rounded-lg p-2.5 flex items-center gap-2 cursor-pointer'+(e.id===curEng.id?' ring-1 ring-green-500':'');d.onclick=()=>pickEng(e);d.innerHTML=`<span class="w-6 h-6 rounded flex items-center justify-center text-xs font-bold text-white shrink-0" style="background:${e.c}">${e.i}</span><span class="text-xs t1 truncate">${e.n}</span>`;pl.appendChild(d)});
+  const cl=document.getElementById('ecL');cl.innerHTML='';
+  if(!ceList.length)cl.innerHTML='<p class="text-xs t3 py-1">暂无自定义引擎</p>';
+  ceList.forEach((e,i)=>{const d=document.createElement('div');d.className='glass rounded-lg p-2.5 flex items-center gap-2 group';d.innerHTML=`<div class="flex items-center gap-2 flex-1 cursor-pointer" onclick="pickEng(ceList[${i}]);renderEngTab()"><span class="w-6 h-6 rounded bg-slate-500/20 flex items-center justify-center text-xs font-bold t2 shrink-0">${e.i}</span><div class="min-w-0"><p class="text-xs t1 truncate">${e.n}</p><p class="text-[10px] t3 truncate">${e.u}</p></div></div><button onclick="rmCE(${i})" class="w-6 h-6 rounded flex items-center justify-center opacity-0 group-hover:opacity-100 t3 hover:text-red-400 cursor-pointer transition-all shrink-0"><svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg></button>`;cl.appendChild(d)});
+}
+function pickEng(e){curEng=e;localStorage.setItem('ainav_eng',e.id);document.getElementById('si').placeholder='在 '+e.n+' 中搜索...';renderEngTab()}
+function addCE(){const n=document.getElementById('ceNI').value.trim(),u=document.getElementById('ceUI').value.trim();if(!n||!u)return;ceList.push({id:'ce_'+Date.now(),n,u,i:n[0].toUpperCase(),c:'#64748B'});localStorage.setItem('ainav_ce',JSON.stringify(ceList));document.getElementById('ceNI').value='';document.getElementById('ceUI').value='';renderEngTab()}
+function rmCE(i){if(curEng.id===ceList[i].id){curEng=ENG[0];localStorage.setItem('ainav_eng',curEng.id)}ceList.splice(i,1);localStorage.setItem('ainav_ce',JSON.stringify(ceList));renderEngTab()}
+
+// Mock login
+function mockLogin(provider){alert('即将跳转 '+provider+' 授权登录页面\n(此为演示，实际需接入 OAuth)')}
+
+// Init
+renderCats();
+document.getElementById('si').placeholder='在 '+curEng.n+' 中搜索...';
+</script>
+</body>
+</html>
