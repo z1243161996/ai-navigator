@@ -17,10 +17,10 @@ body { background: #F1F5F9; color: #0F172A }
 .particle { position: absolute; border-radius: 50%; animation: floatUp linear infinite }
 @keyframes floatUp { 0% { transform: translateY(100vh) scale(0); opacity: 0 } 10% { opacity: 1 } 90% { opacity: 1 } 100% { transform: translateY(-10vh) scale(1); opacity: 0 } }
 
-.glass { backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); transition: background .3s, border-color .3s, box-shadow .3s }
+.glass { -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px); transition: background .3s, border-color .3s, box-shadow .3s }
 .dark .glass { background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.08) }
 .glass { background: rgba(255,255,255,.6); border: 1px solid rgba(0,0,0,.06) }
-.glass-s { backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); transition: background .3s, border-color .3s }
+.glass-s { -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px); transition: background .3s, border-color .3s }
 .dark .glass-s { background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.1) }
 .glass-s { background: rgba(255,255,255,.75); border: 1px solid rgba(0,0,0,.07) }
 
@@ -80,6 +80,9 @@ body { background: #F1F5F9; color: #0F172A }
 ::-webkit-scrollbar-track { background: transparent }
 .dark ::-webkit-scrollbar-thumb { background: rgba(255,255,255,.08) }
 ::-webkit-scrollbar-thumb { background: rgba(0,0,0,.08); border-radius: 3px }
+
+input::placeholder, textarea::placeholder { color: #94A3B8 }
+.dark input::placeholder, .dark textarea::placeholder { color: #64748B }
 
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important } }
 @media (max-width: 640px) { .hm { display: none !important } }
