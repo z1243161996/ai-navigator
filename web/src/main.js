@@ -76,7 +76,7 @@ function doSearch(){const q=document.getElementById('si').value.trim();if(!q)ret
 // Categories
 function renderCats(){
   const c=document.getElementById('catTabs');c.innerHTML='';
-  CK.forEach(k=>{const b=document.createElement('button');b.className='cat-pill shrink-0 px-4 py-2 rounded-xl text-sm font-medium border border-transparent '+(k===curCat?'active':'');b.textContent=k;b.onclick=e=>{e.stopPropagation();curCat=k;renderCats();renderGrid()};c.appendChild(b)});
+  CK.forEach(k=>{const b=document.createElement('button');b.className='cat-pill'+(k===curCat?' active':'');b.textContent=k;b.onclick=e=>{e.stopPropagation();curCat=k;renderCats();renderGrid()};c.appendChild(b)});
 }
 
 // Grid
