@@ -48,4 +48,4 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy dist --project-name=ai-navigator
+          command: pages project create ai-navigator --production-branch main 2>/dev/null; pages deploy dist --project-name=ai-navigator
